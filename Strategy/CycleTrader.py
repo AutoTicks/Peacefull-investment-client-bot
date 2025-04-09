@@ -386,15 +386,17 @@ class CycleTrader(Strategy):
                 ask = self.meta_trader.get_ask(self.symbol)
                 bid = self.meta_trader.get_bid(self.symbol)
                 pips = self.meta_trader.get_pips(self.symbol)
-                up_price = bid+(self.autotrade_threshold/2)*pips
-                down_price = bid-(self.autotrade_threshold/2)*pips
+                up_price = bid+(self.autotrade_pips_restriction/2)*pips
+                down_price = bid-(self.autotrade_pips_restriction/2)*pips
                 tasks = []
-                for cycle_data in active_cycles:
-                    cycle_obj = cycle(cycle_data, self.meta_trader, self, "db")
-                    if len(cycle_obj.orders) <= 2 and len(cycle_obj.closed) == 0 and len(cycle_obj.hedge) == 0:
-                        if cycle_obj.open_price > 0:
-                            if cycle_obj.open_price > down_price and cycle_obj.open_price < up_price:
-                                New_cycles_Restrition = True
+                if self.autotrade_pips_restriction>0:
+                    for cycle_data in active_cycles:
+                        cycle_obj = cycle(cycle_data, self.meta_trader, self, "db")
+                        if len(cycle_obj.orders) <= 2 and len(cycle_obj.closed) == 0 and len(cycle_obj.hedge) == 0:
+                            if cycle_obj.open_price > 0:
+                                if cycle_obj.open_price > down_price and cycle_obj.open_price < up_price:
+                                    New_cycles_Restrition = True
+           
                     if not self.stop:
                         tasks.append(cycle_obj.manage_cycle_orders(
                             self.zone_forward, self.zone_forward2))
